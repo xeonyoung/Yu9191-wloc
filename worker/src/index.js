@@ -12,8 +12,8 @@ app.get("/", (c) => {
 // GET /api/parse?u=<链接>&format=json&cs=<gcj|none>
 //   返回 {lat, lon, name}; 高德/苹果地图(中国大陆均为 GCJ-02)自动转 WGS84; 境外坐标自动跳过(out_of_china)。cs=none 可强制不转换。
 //   不带 format=json 时返回纯文本 "lat=..&lon=.." 片段。
-app.get("/api/parse", async (c) => {
-  const raw = c.req.query("u") || "";
+const parseHandler = async (c) => {
+  const raw = c.req.query("u") || c.req.query("url") || c.req.query("link") || "";
   const cs = (c.req.query("cs") || "").toLowerCase();
   const fmt = (c.req.query("format") || "").toLowerCase();
   try {
@@ -35,7 +35,11 @@ app.get("/api/parse", async (c) => {
     c.header("Access-Control-Allow-Origin", "*");
     return c.json({ error: String(e && e.message ? e.message : e) }, 422);
   }
-});
+};
+
+// 兼容旧快捷指令：/parse 与 /api/parse 等价
+app.get("/api/parse", parseHandler);
+app.get("/parse", parseHandler);
 
 // 兜底 500 也要带 CORS —— 否则快捷指令那边看到的是跨域错误, 而不是真正的原因。
 app.onError((e, c) => {

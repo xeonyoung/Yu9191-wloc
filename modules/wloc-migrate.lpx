@@ -1,0 +1,10 @@
+#!name=WLOC 域名迁移（旧快捷指令免改）
+#!desc=把 wloc-spoofer.wloc.workers.dev 的请求 302 到 wloc.bybot.si
+#!author=local
+#!homepage=https://wloc.bybot.si/
+
+[Rewrite]
+^https?:\/\/wloc-spoofer\.wloc\.workers\.dev\/(.*) https://wloc.bybot.si/$1 302
+
+[MITM]
+hostname = wloc-spoofer.wloc.workers.dev

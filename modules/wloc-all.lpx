@@ -1,0 +1,21 @@
+#!name=Apple WLOC 定位修改（合体版）
+#!desc=定位改写 + 旧域名迁移 二合一 | 选点页 https://wloc.bybot.si/
+#!author=Yu9191 Rewrite / local
+#!homepage=https://wloc.bybot.si/
+
+[Argument]
+longitude = input, "113.94114", tag=经度(在线选点优先)
+latitude = input, "22.544577", tag=纬度(在线选点优先)
+accuracy = input, "25", tag=精度(米)
+randomRadius = input, "0", tag=扰动半径(米，0为关闭)
+logLevel = select, "info", "off", "error", "warn", "debug", "all", tag=日志级别
+
+[Script]
+http-response ^https?:\/\/(?:gs-loc(?:-cn)?\.apple\.com|gsp-ssl\.ls\.apple\.com|bluedot\.is\.autonavi\.com(?:\.gds\.alibabadns\.com)?)\/clls\/wloc script-path=https://wloc.bybot.si/dist/wloc.js, requires-body=true, binary-body-mode=true, timeout=30, tag=Apple WLOC, argument=[{longitude},{latitude},{accuracy},{randomRadius},{logLevel}]
+http-request ^https?:\/\/gs-loc(-cn)?\.apple\.com\/wloc-settings\/save script-path=https://wloc.bybot.si/dist/wloc-settings.js, timeout=10, tag=WLOC Settings
+
+[Rewrite]
+^https?:\/\/wloc-spoofer\.wloc\.workers\.dev\/(.*) https://wloc.bybot.si/$1 302
+
+[MITM]
+hostname = gs-loc.apple.com, gs-loc-cn.apple.com, gsp-ssl.ls.apple.com, bluedot.is.autonavi.com, bluedot.is.autonavi.com.gds.alibabadns.com, wloc-spoofer.wloc.workers.dev

@@ -8,24 +8,59 @@
 
 > ⚠️ **iOS 27 beta 6 起，系统已禁止对 `gs-loc.apple.com` 进行 MITM 拦截。** 目前该版本及之后的 beta 版本暂时无法使用本项目，等待后续适配方案。
 
+> ## 📌 当前状态（2026-10-24）
+>
+> 原作者仓库 `Yu9191/wloc` 已 404。旧模块里两条 `script-path` 指向它——**脚本拉不到时，MITM 规则还在、拦截也还在，但脚本不执行，定位不会变**，而"设置成功"提示来自快捷指令本身，不代表坐标写进了设备。
+>
+> 本仓库已把脚本与模块改为**自托管分发**，不再依赖 GitHub raw：
+>
+> ```
+> 脚本   https://wloc.bybot.si/dist/wloc.js
+>        https://wloc.bybot.si/dist/wloc-settings.js
+> 模块   https://wloc.bybot.si/modules/wloc.sgmodule   (小火箭/Surge)
+>        https://wloc.bybot.si/modules/wloc.conf        (Quantumult X)
+>        https://wloc.bybot.si/modules/wloc.lpx         (Loon)
+>        https://wloc.bybot.si/modules/wloc.stoverride  (Stash)
+>        https://wloc.bybot.si/modules/wloc.module      (Shadowrocket 备用写法)
+> 选点   https://wloc.bybot.si/
+> 解析   https://wloc.bybot.si/api/parse?u=<链接>&format=json
+> ```
+>
+> 服务跑在本机 Node + Cloudflare Tunnel（`systemctl status wloc-worker`），`dist/wloc.js` 带诊断打点，原版备份在 `dist/orig/`。
+>
+> **自查（Safari，代理开着）：**
+> ```
+> https://gs-loc.apple.com/wloc-settings/save?action=probe
+> ```
+>
+> | `last.evt` | 含义 | 下一步 |
+> |------|------|--------|
+> | 打不开 / 非 JSON | MITM 没生效或模块没启用 | 查证书信任、模块开关、代理连接 |
+> | `passthrough` | 拦到了，但设备里没坐标 | 重跑快捷指令 / 选点页面存一次 |
+> | `patched` | 拦截与改写都成功 | 系统缓存 → **重启设备**（iOS 26 必须） |
+> | `parse-fail` / `error` | 响应格式对不上 | 见 `docs/troubleshooting-ios26.md` 第 4 节 |
+>
+> iOS 26.6.1 上"手动开关定位"已不够用，`locationd` 的内存缓存必须重启才清。完整流程见 [`docs/troubleshooting-ios26.md`](docs/troubleshooting-ios26.md)。
+
+
 ---
 
 ## 订阅地址
 
 **Surge:**
-https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.sgmodule
+https://wloc.bybot.si/modules/wloc.sgmodule
 
 **Quantumult X:**
-https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.conf
+https://wloc.bybot.si/modules/wloc.conf
 
 **Loon:**
-https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.lpx
+https://wloc.bybot.si/modules/wloc.lpx
 
 **Stash:**
-https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.stoverride
+https://wloc.bybot.si/modules/wloc.stoverride
 
 **Shadowrocket(小火箭):**
-https://raw.githubusercontent.com/Yu9191/wloc/refs/heads/main/modules/wloc.module
+https://wloc.bybot.si/modules/wloc.module
 
 > Egern 可直接使用 Surge 模块
 > Stash 请直接订阅上面的 `.stoverride`，无需用 Script Hub 转换
@@ -219,7 +254,7 @@ cd worker && npm install && npm test
 
 **一键部署（Workers）：**
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Yu9191/wloc/tree/main/worker)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/WWE1203/Yu9191-wloc/tree/main/worker)
 
 > 一键部署仅支持 Workers 模式，点击按钮后按提示授权即可完成部署。
 
@@ -227,7 +262,7 @@ cd worker && npm install && npm test
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/Yu9191/wloc.git
+git clone https://github.com/WWE1203/Yu9191-wloc.git
 cd wloc/worker
 
 # 2. 安装依赖
@@ -250,7 +285,7 @@ npm run deploy
 Pages 部署不支持一键按钮，需要手动执行：
 
 ```bash
-git clone https://github.com/Yu9191/wloc.git
+git clone https://github.com/WWE1203/Yu9191-wloc.git
 cd wloc/worker
 npm install
 npm run pages:deploy

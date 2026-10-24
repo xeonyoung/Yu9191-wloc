@@ -1,0 +1,41 @@
+name: Apple WLOC 定位修改（合体版）
+desc: "定位改写 + 旧域名迁移 二合一 | 选点页 https://wloc.bybot.si/"
+author: Yu9191 Rewrite / local
+homepage: https://wloc.bybot.si/
+icon: https://wloc.bybot.si/wloc.jpg
+category: Tools
+
+http:
+  mitm:
+    - "gs-loc.apple.com"
+    - "gs-loc-cn.apple.com"
+    - "gsp-ssl.ls.apple.com"
+    - "bluedot.is.autonavi.com"
+    - "bluedot.is.autonavi.com.gds.alibabadns.com"
+    - "wloc-spoofer.wloc.workers.dev"
+  script:
+    - match: ^https?:\/\/(?:gs-loc(?:-cn)?\.apple\.com|gsp-ssl\.ls\.apple\.com|bluedot\.is\.autonavi\.com(?:\.gds\.alibabadns\.com)?)\/clls\/wloc
+      name: WLOC.Location
+      type: response
+      require-body: true
+      binary-mode: true
+      max-size: 0
+      timeout: 30
+      argument: longitude=113.94114&latitude=22.544577&accuracy=25&randomRadius=0&logLevel=info
+    - match: ^https?:\/\/gs-loc(-cn)?\.apple\.com\/wloc-settings\/save
+      name: WLOC.Settings
+      type: request
+      require-body: false
+      timeout: 10
+  url-rewrite:
+    - match: ^https?:\/\/wloc-spoofer\.wloc\.workers\.dev\/(.*)
+      replace: https://wloc.bybot.si/$1
+      type: 302
+
+script-providers:
+  WLOC.Location:
+    url: https://wloc.bybot.si/dist/wloc.js
+    interval: 86400
+  WLOC.Settings:
+    url: https://wloc.bybot.si/dist/wloc-settings.js
+    interval: 86400
